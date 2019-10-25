@@ -40,6 +40,29 @@ namespace MappingGenerator
             return false;
         }
 
+        public static bool IsPublicPropertyOrFieldSymbol(ISymbol x) {
+            if (x.Kind != SymbolKind.Property && x.Kind != SymbolKind.Field)
+                return false;
+            switch (x) {
+                case IPropertySymbol mSymbol:
+                    if (mSymbol.IsStatic || mSymbol.IsIndexer || mSymbol.DeclaredAccessibility != Accessibility.Public)
+                    {
+                        return false;
+                    }
+                    return true;
+                    break;
+                case IFieldSymbol mSymbol:
+                    if (mSymbol.IsStatic || mSymbol.DeclaredAccessibility != Accessibility.Public)
+                    {
+                        return false;
+                    }
+                    return true;
+                    break;
+                default: 
+                    return false;
+            }
+        }
+
         public static IEnumerable<IPropertySymbol> GetUnwrappingProperties(ITypeSymbol wrapperType, ITypeSymbol wrappedType)
         {
             return GetPublicPropertySymbols(wrapperType).Where(x => x.GetMethod.DeclaredAccessibility == Accessibility.Public && x.Type == wrappedType);
@@ -161,6 +184,10 @@ namespace MappingGenerator
             var type = node.FindNearestContainer<ClassDeclarationSyntax, StructDeclarationSyntax>();
             var symbol = semanticModel.GetDeclaredSymbol(type);
             return symbol.ContainingAssembly;
+        }
+
+        public static IEnumerable<ISymbol> GetFieldsAndPropertiesThatCanBeReadPublicly(ITypeSymbol source) {
+            return GetBaseTypesAndThis(source).SelectMany(x=> x.GetMembers()).Where(y=> IsPublicPropertyOrFieldSymbol(y) && (y is IPropertySymbol || y is IFieldSymbol));
         }
     }
 }

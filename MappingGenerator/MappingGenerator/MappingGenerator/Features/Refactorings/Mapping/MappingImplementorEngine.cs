@@ -39,6 +39,7 @@ namespace MappingGenerator.Features.Refactorings.Mapping
 
         private readonly IReadOnlyList<IMappingMethodImplementor> implementors = new List<IMappingMethodImplementor>()
         {
+            new EqualsMethodImplementors(),
             new IdentityMappingMethodImplementor(),
             new SingleParameterPureMappingMethodImplementor(),
             new MultiParameterPureMappingMethodImplementor(),
